@@ -21,6 +21,15 @@ def start_handler(message):
 	bot.send_message(message.chat.id, f'Hello')
 
 
+@bot.message_handler(commands=['photo'])
+def photo_handler(message):
+	print(message)
+	img = message.photo
+	print(img)
+	with open(img, 'wb') as f:
+		f.read()
+
+
 if __name__ == '__main__':
 	print('--> Запускаю бот')
 	bot.polling(True)
