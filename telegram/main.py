@@ -1,9 +1,11 @@
 import os
 import telebot
-
+import requests
 
 from dotenv import load_dotenv
 from pathlib import Path
+
+from libs.face_detected.detecters import create_mask_nake
 
 
 # env_path = os.Path('../')/'.env'
@@ -14,6 +16,24 @@ TOKEN = os.getenv('TG_TOKEN')
 bot = telebot.TeleBot(TOKEN)
 
 
+def download_image(file_path, save=False):
+	'''Download image
+	Скачивает изображение и передает его в битах
+	
+	Arguments:
+		file_path {str} -- путь к файлу
+	
+	Returns:
+		<requests> -- объект Requests
+	'''
+	url = 'https://api.telegram.org/file/bot{token}/{file_path}'
+	curr_file = requests.get(url.format(token=TOKEN, file_path=file_path))
+	if save:
+		with open('down_data/'+file_path.split('/')[-1], 'wb') as f:
+			f.write(curr_file.content)
+	return curr_file
+
+
 @bot.message_handler(commands=['start'])
 def start_handler(message):
 	print(f'--> Started by user: {message.chat.id}')
@@ -21,15 +41,28 @@ def start_handler(message):
 	bot.send_message(message.chat.id, f'Hello')
 
 
-@bot.message_handler(commands=['photo'])
+@bot.message_handler(content_types=['photo', 'document'])
 def photo_handler(message):
-	print(message)
-	img = message.photo
-	print(img)
-	with open(img, 'wb') as f:
-		f.read()
+	print(f'Start photo handler by {message.chat.id}')
+	file_id = message.photo[-1].file_id
+	file = bot.get_file(file_id)
+	img = download_image(file.file_path, save=True)
+
+	img = create_mask_nake('data/download/'+file.file_path.split('/')[-1], save=True)
+
+	name = file.file_path.split('/')[-1].split('.')[0] + '.png'
+	bot.send_photo(message.chat.id, open('data/hand/'+name, 'rb'))
+
+	# bot.send_photo(message.chat.id, img.content)
+	# with open('down_data/'+file.file_path.split('/')[-1], 'rb') as f:
+	# 	bot.send_photo(message.chat.id, f)
+	# bot.send_message(message.chat.id, open('down_data/'+file.file_path.split('/')[-1], 'rb'))
+
+
+def start_bot():
+	print('--> Запускаю бот')
+	bot.polling(True)
 
 
 if __name__ == '__main__':
-	print('--> Запускаю бот')
-	bot.polling(True)
+	start_bot()
