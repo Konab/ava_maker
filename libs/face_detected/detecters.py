@@ -139,14 +139,15 @@ def calc_eyebrow_coef(facelandmarks_list):
 	return eye_len / eyebrow_len
 
 def determ_eyebrow(facelandmarks_list):
-	CONST_EYEBROW_COEF_MEDIUM = 1.6
-	CONST_EYEBROW_COEF_LOW = 1.4
+	CONST_EYEBROW_COEF_MEDIUM = 1.5
+	CONST_EYEBROW_COEF_LOW = 1.3
 
 	index = calc_eyebrow_coef(facelandmarks_list)
+	print('eyebrow detected: ', index)
 
 	if index <= CONST_EYEBROW_COEF_LOW:
 		return 'data/eyebrows/1.png'
-	elif CONST_EYEBROW_COEF_MEDIUM <= index < CONST_EYEBROW_COEF_LOW:
+	elif CONST_EYEBROW_COEF_LOW < index <= CONST_EYEBROW_COEF_MEDIUM:
 		return 'data/eyebrows/2.png'
 	else:
 		return 'data/eyebrows/3.png'
@@ -166,13 +167,14 @@ def calc_eye_coef(facelandmarks_list):
 	eye_arr = np.array(facelandmarks_list[0]['left_eye'])
 	# Find lenght of eye
 	eye_len = eye_arr[-1][0] - eye_arr[0][0]
-	return eye_len/(eye_arr[4][1] - eye_arr[4][1])
+	return eye_len/(eye_arr[5][1] - eye_arr[3][1])
 
 def determ_eye(facelandmarks_list):
-	CONST_EYEBROW_COEF_MEDIUM = 1.6
-	CONST_EYEBROW_COEF_LOW = 1.4
+	CONST_EYEBROW_COEF_MEDIUM = 5
+	CONST_EYEBROW_COEF_LOW = 3
 
 	index = calc_eye_coef(facelandmarks_list)
+	print('EYE detected: ', index)
 
 	if index <= CONST_EYEBROW_COEF_LOW:
 		return 'data/eyes/black_1.png'
@@ -193,7 +195,7 @@ def add_lips(type, image):
 
 def add_eyebrows(type, image):
 	eyebrows = Image.open(type)
-	position = ((48), (115))
+	position = ((50), (115))
 	image.paste(eyebrows, position, eyebrows)
 	return image
 
@@ -231,10 +233,11 @@ def make_photo(face_shape, lips, eyebrows, eyes, nose, save=False, name='test'):
 	return image
 
 def create_face_shape(pic_path, save=False):
-	CONST_CHIN_COEF_MEDIUM = 1.155
-	CONST_CHIN_COEF_LOW = 1.10
+	CONST_CHIN_COEF_MEDIUM = 1.355
+	CONST_CHIN_COEF_LOW = 1.25
 
 	index = create_face_mask_choice(create_mask_nake(pic_path, save))
+	print('Face Shape: ', index)
 
 	if index <= CONST_CHIN_COEF_LOW:
 		return 'data/faces/small_black.png'
